@@ -1,0 +1,845 @@
+/* ==========================================================================
+   Monitos en Fuga - estilos propios (sin frameworks CSS)
+   Tema: jungla. Paneles de madera, carteles de pergamino y suelo de selva.
+   Organizacion: variables, base, pantalla de inicio, partida (barra, paneles,
+   jungla, eventos) y pantalla de resultado.
+   ========================================================================== */
+
+:root {
+  /* Selva */
+  --selva-profunda: #0a2113;
+  --selva: #12351f;
+  --hoja: #4c9a3f;
+  --hoja-clara: #7cc55a;
+  --hoja-oscura: #2f6b2b;
+
+  /* Madera */
+  --madera: #6b4423;
+  --madera-clara: #8a5a2b;
+  --madera-oscura: #37210f;
+
+  /* Papel y tinta */
+  --pergamino: #f1e2bf;
+  --pergamino-oscuro: #dcc69a;
+  --tinta: #3d2a15;
+  --crema: #fbf2dd;
+
+  /* Acentos */
+  --fuego: #e8590c;
+  --fuego-claro: #f8b34c;
+  --sangre: #a52a2a;
+  --platano: #f2c14e;
+
+  /* Texturas reutilizables */
+  --tablon: linear-gradient(180deg, #7d5531 0%, #64411f 45%, #7d5531 100%);
+  --vetas: repeating-linear-gradient(90deg, rgba(0, 0, 0, 0.12) 0 1px, transparent 1px 7px);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  /* Follaje de fondo: manchas verdes grandes y difusas sobre selva profunda. */
+  background-color: var(--selva-profunda);
+  background-image: radial-gradient(ellipse 40% 30% at 12% 15%, rgba(76, 154, 63, 0.18), transparent 70%),
+    radial-gradient(ellipse 35% 28% at 88% 20%, rgba(47, 107, 43, 0.22), transparent 70%),
+    radial-gradient(ellipse 45% 35% at 70% 90%, rgba(76, 154, 63, 0.14), transparent 70%),
+    radial-gradient(ellipse 30% 25% at 20% 85%, rgba(47, 107, 43, 0.2), transparent 70%);
+  color: var(--crema);
+  font-family: 'Trebuchet MS', 'Segoe UI', Verdana, sans-serif;
+  overflow: hidden;
+}
+
+h1,
+h2,
+h3 {
+  margin: 0;
+  font-family: Georgia, 'Times New Roman', serif;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+/* Tablita de madera para las teclas */
+kbd {
+  display: inline-block;
+  min-width: 1.7rem;
+  padding: 0.15rem 0.45rem;
+  border: 2px solid var(--madera-oscura);
+  border-radius: 4px;
+  background-image: var(--vetas), linear-gradient(180deg, #a06a33, #7d5027);
+  box-shadow: 0 2px 0 var(--madera-oscura);
+  color: var(--crema);
+  font-family: Georgia, serif;
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+img {
+  image-rendering: pixelated;
+}
+
+/* Tabla de madera: la usan los paneles y las tarjetas */
+.madera {
+  background-image: var(--vetas), var(--tablon);
+  border: 3px solid var(--madera-oscura);
+  border-radius: 8px;
+  box-shadow: 0 4px 0 rgba(30, 18, 8, 0.55);
+}
+
+/* ---------------------------- Pantalla de inicio -------------------------- */
+
+.pantalla-inicio {
+  height: 100vh;
+  overflow-y: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1rem;
+}
+
+.inicio-contenido {
+  width: min(1100px, 100%);
+  text-align: center;
+}
+
+.titulo-juego {
+  font-size: clamp(2.6rem, 7vw, 4.6rem);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--hoja-clara);
+  /* Letras "talladas": sombra dura, nada de brillos de neon. */
+  text-shadow: 3px 3px 0 var(--madera-oscura), 6px 6px 0 rgba(0, 0, 0, 0.35);
+}
+
+.titulo-juego span {
+  color: var(--fuego-claro);
+}
+
+.inicio-lema {
+  max-width: 660px;
+  margin: 0.8rem auto 1.6rem;
+  color: var(--pergamino);
+  font-size: 1.02rem;
+  line-height: 1.55;
+}
+
+.inicio-columnas {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(265px, 1fr));
+  gap: 1.1rem;
+  text-align: left;
+}
+
+/* Carteles de madera con el texto sobre pergamino */
+.tarjeta {
+  background-image: var(--vetas), var(--tablon);
+  border: 4px solid var(--madera-oscura);
+  border-radius: 10px;
+  box-shadow: 0 5px 0 rgba(30, 18, 8, 0.55);
+  padding: 0.75rem;
+  /* El pergamino se estira hasta el fondo del cartel */
+  display: flex;
+  flex-direction: column;
+}
+
+.tarjeta ul,
+.tarjeta .controles-inicio {
+  flex: 1;
+}
+
+.tarjeta h2 {
+  margin-bottom: 0.55rem;
+  padding: 0.3rem 0.5rem;
+  background: rgba(30, 18, 8, 0.35);
+  border-radius: 5px;
+  color: var(--platano);
+  font-size: 1rem;
+  letter-spacing: 0.05em;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.tarjeta ul,
+.tarjeta .controles-inicio {
+  margin: 0;
+  padding: 0.7rem 0.8rem 0.7rem 1.6rem;
+  background: var(--pergamino);
+  border: 2px solid var(--madera-oscura);
+  border-radius: 6px;
+  color: var(--tinta);
+  font-size: 0.89rem;
+  line-height: 1.55;
+}
+
+.tarjeta li::marker {
+  color: var(--hoja-oscura);
+}
+
+.lista-objetos {
+  list-style: none;
+  padding-left: 0.8rem;
+}
+
+.lista-objetos li {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 0.45rem;
+  font-weight: 600;
+}
+
+.lista-objetos img {
+  width: 28px;
+  height: 28px;
+}
+
+.controles-inicio {
+  display: grid;
+  align-content: start;
+  gap: 0.8rem;
+  padding-left: 0.8rem;
+}
+
+.controles-jugador {
+  border-left: 5px solid var(--hoja-oscura);
+  padding-left: 0.7rem;
+}
+
+.controles-jugador h3 {
+  font-size: 1rem;
+  margin-bottom: 0.35rem;
+  color: var(--tinta);
+}
+
+.controles-jugador p {
+  margin: 0.3rem 0;
+  color: var(--tinta);
+  font-size: 0.87rem;
+}
+
+.controles-jugador.jugador1 {
+  border-color: #b5651d;
+}
+
+.controles-jugador.jugador2 {
+  border-color: #b23a6a;
+}
+
+/* Boton principal: hoja grande */
+.boton-principal {
+  margin-top: 1.6rem;
+  padding: 0.9rem 2.6rem;
+  border: 3px solid var(--madera-oscura);
+  border-radius: 999px 999px 8px 8px;
+  background-image: linear-gradient(180deg, var(--hoja-clara), var(--hoja-oscura));
+  color: #10280e;
+  font-family: Georgia, serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  box-shadow: 0 5px 0 var(--madera-oscura);
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+
+.boton-principal:hover:enabled {
+  transform: translateY(-2px);
+  box-shadow: 0 7px 0 var(--madera-oscura);
+}
+
+.boton-principal:active:enabled {
+  transform: translateY(3px);
+  box-shadow: 0 2px 0 var(--madera-oscura);
+}
+
+.boton-principal:disabled {
+  opacity: 0.65;
+  cursor: progress;
+}
+
+.inicio-nota {
+  margin-top: 0.9rem;
+  color: var(--pergamino-oscuro);
+  font-size: 0.82rem;
+  font-style: italic;
+}
+
+.mensaje-error {
+  margin-top: 1rem;
+  padding: 0.6rem 0.9rem;
+  border: 2px solid var(--sangre);
+  border-radius: 6px;
+  background: rgba(165, 42, 42, 0.18);
+  color: #ffd9d9;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+/* -------------------------------- Partida --------------------------------- */
+
+.aplicacion {
+  height: 100vh;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  gap: 0.6rem;
+  padding: 0.6rem;
+}
+
+.barra-superior {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.45rem 1rem;
+  background-image: var(--vetas), var(--tablon);
+  border: 3px solid var(--madera-oscura);
+  border-radius: 8px;
+  box-shadow: 0 4px 0 rgba(30, 18, 8, 0.55);
+}
+
+.barra-izquierda,
+.barra-derecha {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+}
+
+.barra-titulo {
+  font-family: Georgia, serif;
+  font-size: 1.45rem;
+  font-weight: 700;
+  color: var(--hoja-clara);
+  text-shadow: 2px 2px 0 var(--madera-oscura);
+}
+
+.barra-titulo span {
+  color: var(--fuego-claro);
+}
+
+.barra-id {
+  color: var(--pergamino-oscuro);
+  font-size: 0.82rem;
+}
+
+.temporizador {
+  text-align: center;
+  padding: 0.1rem 0.9rem;
+  background: var(--pergamino);
+  border: 2px solid var(--madera-oscura);
+  border-radius: 6px;
+}
+
+.temporizador-etiqueta {
+  display: block;
+  font-size: 0.65rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #7a6034;
+}
+
+.temporizador-valor {
+  font-family: Georgia, serif;
+  font-size: 1.7rem;
+  font-weight: 700;
+  color: var(--tinta);
+}
+
+.temporizador-alerta {
+  background: #f6cdb0;
+}
+
+.temporizador-alerta .temporizador-valor {
+  color: #9a2c00;
+  animation: parpadeo 1s infinite;
+}
+
+@keyframes parpadeo {
+  50% {
+    opacity: 0.45;
+  }
+}
+
+.estado-partida {
+  padding: 0.25rem 0.75rem;
+  background: rgba(30, 18, 8, 0.35);
+  border: 2px solid var(--madera-oscura);
+  border-radius: 5px;
+  font-size: 0.78rem;
+  color: var(--pergamino);
+}
+
+.boton-secundario {
+  padding: 0.45rem 0.9rem;
+  border: 2px solid var(--madera-oscura);
+  border-radius: 6px;
+  background-image: linear-gradient(180deg, #a06a33, #7d5027);
+  box-shadow: 0 3px 0 var(--madera-oscura);
+  color: var(--crema);
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.boton-secundario:hover {
+  background-image: linear-gradient(180deg, #b87a3c, #8d5a2c);
+}
+
+.boton-secundario:active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 var(--madera-oscura);
+}
+
+.zona-juego {
+  display: grid;
+  min-height: 0;
+}
+
+/* ------------------ Paneles de los monos (pie de pantalla) ----------------- */
+
+.pie-juego {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.6rem;
+}
+
+.panel-jugador {
+  background-image: var(--vetas), var(--tablon);
+  border: 3px solid var(--madera-oscura);
+  border-radius: 8px;
+  box-shadow: 0 4px 0 rgba(30, 18, 8, 0.55);
+  padding: 0.45rem 0.7rem;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  min-width: 0;
+}
+
+.panel-cabecera {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 0.55rem;
+  background: rgba(30, 18, 8, 0.35);
+  border-radius: 6px;
+}
+
+.panel-cabecera h2 {
+  font-size: 1.05rem;
+  color: var(--crema);
+}
+
+.panel-jugador.p1 .panel-cabecera h2 {
+  color: var(--platano);
+}
+
+.panel-jugador.p2 .panel-cabecera h2 {
+  color: #f0a8c8;
+}
+
+.panel-sprite {
+  width: 36px;
+  height: 36px;
+}
+
+/* Vida y energia una al lado de la otra */
+.panel-barras {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.6rem;
+  min-width: 0;
+}
+
+.barra-etiqueta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: var(--pergamino);
+  margin-bottom: 0.15rem;
+}
+
+.barra-fondo {
+  height: 15px;
+  background-color: #2b1a0c;
+  border: 2px solid var(--madera-oscura);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.barra-relleno {
+  height: 100%;
+  transition: width 0.25s ease;
+}
+
+.barra-vida {
+  background-image: linear-gradient(180deg, #d94a4a, #8f1f1f);
+}
+
+.barra-energia {
+  background-image: linear-gradient(180deg, var(--hoja-clara), var(--hoja-oscura));
+}
+
+.puntos {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.2rem 0.6rem;
+  background: var(--pergamino);
+  border: 2px solid var(--madera-oscura);
+  border-radius: 6px;
+  color: var(--tinta);
+  font-size: 0.76rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.puntos strong {
+  font-family: Georgia, serif;
+  font-size: 1.4rem;
+  color: #8a5a00;
+}
+
+/* Efectos activos y teclas del mono */
+.panel-extra {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.3rem;
+}
+
+.etiquetas-estado {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.etiqueta {
+  padding: 0.12rem 0.55rem;
+  border: 2px solid var(--madera-oscura);
+  border-radius: 5px;
+  background: rgba(30, 18, 8, 0.35);
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--pergamino);
+}
+
+.etiqueta.escudo {
+  background: var(--hoja-oscura);
+  color: #eaffe0;
+}
+
+.etiqueta.sobrecarga {
+  background: #a24a12;
+  color: #ffe9d2;
+}
+
+.teclas-panel {
+  margin: 0;
+  color: var(--pergamino);
+  font-size: 0.72rem;
+  white-space: nowrap;
+}
+
+.teclas-panel kbd {
+  min-width: 1.4rem;
+  padding: 0.02rem 0.35rem;
+  font-size: 0.7rem;
+}
+
+/* --------------------------------- Jungla --------------------------------- */
+
+.arena-contenedor {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+}
+
+.arena {
+  position: relative;
+  /* El ancho se limita por la altura libre de la ventana para que la jungla
+     entre completa sin deformarse. */
+  width: min(100%, calc((100vh - 11.5rem) * var(--columnas) / var(--filas)));
+  aspect-ratio: var(--columnas) / var(--filas);
+  /* Suelo de selva: tierra oscura con matas de hierba y un surco suave. */
+  background-color: #1b3d20;
+  background-image: radial-gradient(circle at 28% 32%, rgba(124, 197, 90, 0.16) 0 11%, transparent 12%),
+    radial-gradient(circle at 72% 68%, rgba(47, 107, 43, 0.3) 0 13%, transparent 14%),
+    radial-gradient(circle at 50% 50%, rgba(20, 53, 31, 0.5) 0 40%, transparent 42%),
+    linear-gradient(rgba(10, 33, 19, 0.35) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(10, 33, 19, 0.35) 1px, transparent 1px);
+  background-size: calc(300% / var(--columnas)) calc(300% / var(--filas)),
+    calc(500% / var(--columnas)) calc(500% / var(--filas)),
+    calc(700% / var(--columnas)) calc(700% / var(--filas)),
+    calc(100% / var(--columnas)) calc(100% / var(--filas)),
+    calc(100% / var(--columnas)) calc(100% / var(--filas));
+  /* Marco de troncos alrededor del claro */
+  border: 10px solid var(--madera-oscura);
+  border-radius: 10px;
+  box-shadow: inset 0 0 0 3px rgba(122, 82, 48, 0.55), inset 0 0 60px rgba(0, 0, 0, 0.55),
+    0 5px 0 rgba(30, 18, 8, 0.5);
+  overflow: hidden;
+}
+
+.arena > * {
+  position: absolute;
+}
+
+/* Los arboles brotan durante la partida */
+.arbol {
+  padding: 1%;
+  animation: brotar 0.45s ease-out;
+  filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.55));
+}
+
+@keyframes brotar {
+  from {
+    transform: scale(0.25) rotate(-8deg);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1) rotate(0);
+    opacity: 1;
+  }
+}
+
+.recurso {
+  padding: 0.6%;
+  animation: flotar 1.8s ease-in-out infinite;
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.6));
+}
+
+@keyframes flotar {
+  50% {
+    transform: translateY(-8%);
+  }
+}
+
+.jugador {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: left 0.12s linear, top 0.12s linear;
+  z-index: 2;
+}
+
+.jugador img {
+  width: 94%;
+  height: 94%;
+  filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.65));
+}
+
+.jugador.con-escudo::after {
+  content: '';
+  position: absolute;
+  inset: -8%;
+  border: 3px solid var(--hoja-clara);
+  border-radius: 50%;
+}
+
+.jugador.con-sobrecarga::before {
+  content: '';
+  position: absolute;
+  inset: 8%;
+  background: radial-gradient(circle, rgba(232, 89, 12, 0.5), transparent 70%);
+}
+
+/* ------------------------------- El incendio ------------------------------ */
+
+.fuego {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  /* Una llama por casilla: el tamano del mosaico depende de cuantas casillas
+     ocupa el fuego en ese momento. */
+  background-image: url('/sprites/fuego.svg');
+  background-size: calc(100% / var(--lado-fuego)) calc(100% / var(--lado-fuego));
+  background-color: rgba(120, 30, 10, 0.35);
+  border: 3px solid #7a2f10;
+  border-radius: 4px;
+  opacity: 0.9;
+  /* Se anima tanto el desplazamiento como el cambio de tamano. */
+  transition: left 0.25s linear, top 0.25s linear, width 0.6s ease, height 0.6s ease;
+  animation: arder 0.7s steps(2) infinite;
+}
+
+@keyframes arder {
+  50% {
+    opacity: 0.75;
+    background-color: rgba(232, 89, 12, 0.4);
+  }
+}
+
+.fuego-etiqueta {
+  margin-top: 0.15rem;
+  padding: 0.05rem 0.4rem;
+  background: #5c1d08;
+  border: 1px solid #2a0d02;
+  border-radius: 3px;
+  color: #ffd9b3;
+  font-family: Georgia, serif;
+  font-size: 0.62rem;
+  letter-spacing: 0.1em;
+}
+
+/* ------------------- Aviso flotante con el ultimo evento ------------------- */
+
+.aviso {
+  top: 3%;
+  left: 50%;
+  z-index: 3;
+  max-width: 70%;
+  padding: 0.35rem 0.9rem;
+  transform: translateX(-50%);
+  background: var(--pergamino);
+  border: 3px solid var(--madera-oscura);
+  border-radius: 6px;
+  box-shadow: 0 3px 0 rgba(30, 18, 8, 0.6);
+  color: var(--tinta);
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-align: center;
+  pointer-events: none;
+  animation: aparecer-aviso 0.25s ease-out;
+}
+
+@keyframes aparecer-aviso {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -30%);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+.aviso-ataque {
+  border-color: #8f1f1f;
+  color: #7a1010;
+}
+
+.aviso-recurso {
+  color: #6b4700;
+}
+
+.aviso-fuego {
+  border-color: #a8420a;
+  color: #8a3300;
+}
+
+.aviso-error {
+  background: #f6d2c4;
+  border-color: #7a1010;
+  color: #7a1010;
+}
+
+.aviso-fin {
+  border-color: #235c1d;
+  color: #235c1d;
+}
+
+/* Error de conexion con el servidor, fijo arriba */
+.aviso-conexion {
+  position: fixed;
+  top: 5rem;
+  left: 50%;
+  z-index: 50;
+  margin: 0;
+  transform: translateX(-50%);
+}
+
+/* ----------------------------- Pantalla final ----------------------------- */
+
+.capa-resultado {
+  position: fixed;
+  inset: 0;
+  /* Por encima de todo lo de la partida, incluidos los monos de la jungla. */
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(6, 20, 11, 0.9);
+}
+
+.tarjeta-resultado {
+  width: min(470px, 92vw);
+  padding: 1.6rem;
+  background-image: var(--vetas), var(--tablon);
+  border: 5px solid var(--madera-oscura);
+  border-radius: 12px;
+  box-shadow: 0 10px 0 rgba(20, 12, 5, 0.6), 0 20px 50px rgba(0, 0, 0, 0.6);
+  text-align: center;
+}
+
+.tarjeta-resultado h2 {
+  font-size: 0.85rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--platano);
+}
+
+.resultado-ganador {
+  margin: 0.5rem 0 0.2rem;
+  font-family: Georgia, serif;
+  font-size: 2.1rem;
+  font-weight: 700;
+  color: var(--crema);
+  text-shadow: 2px 2px 0 var(--madera-oscura);
+}
+
+.resultado-motivo {
+  margin: 0 0 1.1rem;
+  color: var(--pergamino-oscuro);
+  font-size: 0.9rem;
+  font-style: italic;
+}
+
+.tabla-resultado {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--pergamino);
+  border: 2px solid var(--madera-oscura);
+  border-radius: 6px;
+  overflow: hidden;
+  color: var(--tinta);
+  font-size: 0.92rem;
+}
+
+.tabla-resultado th,
+.tabla-resultado td {
+  padding: 0.5rem;
+  border-bottom: 1px solid var(--pergamino-oscuro);
+}
+
+.tabla-resultado th {
+  background: var(--pergamino-oscuro);
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 0.72rem;
+}
+
+/* --------------------------- Pantallas estrechas -------------------------- */
+
+@media (max-width: 900px) {
+  .pie-juego {
+    grid-template-columns: 1fr;
+  }
+
+  .panel-jugador {
+    flex-wrap: wrap;
+  }
+
+  .panel-barras {
+    flex-basis: 100%;
+  }
+}

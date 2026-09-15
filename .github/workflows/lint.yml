@@ -1,0 +1,43 @@
+# Proposito: validar el estilo y los tipos del codigo del frontend y del backend.
+# Resultado verificable: el job falla si ESLint o TypeScript encuentran problemas.
+name: Lint
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  lint:
+    name: ESLint + TypeScript (frontend y backend)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Descargar el repositorio
+        uses: actions/checkout@v4
+
+      - name: Preparar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            backend/package-lock.json
+            frontend/package-lock.json
+
+      - name: Instalar dependencias
+        run: npm run install:all
+
+      - name: Lint del backend
+        run: npm run lint --prefix backend
+
+      - name: Lint del frontend
+        run: npm run lint --prefix frontend
+
+      - name: Comprobar los tipos del backend
+        run: npm run typecheck --prefix backend
+
+      - name: Comprobar los tipos del frontend
+        run: npm run typecheck --prefix frontend

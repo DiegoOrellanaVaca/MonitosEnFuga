@@ -1,0 +1,17 @@
+# Configuracion del servicio en Render (https://render.com).
+# Render instala las dependencias, compila el frontend y el backend y arranca
+# Express, que sirve el juego y la API en el mismo dominio y puerto.
+services:
+  - type: web
+    name: monitos-en-fuga
+    runtime: node
+    plan: free
+    region: oregon
+    # Solo se instalan las dependencias de frontend y backend: Playwright
+    # (dependencia de la raiz) no hace falta en el servidor de produccion.
+    buildCommand: npm install --prefix frontend && npm install --prefix backend && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/salud
+    envVars:
+      - key: NODE_VERSION
+        value: '22'

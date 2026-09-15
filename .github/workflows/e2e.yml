@@ -1,0 +1,51 @@
+# Proposito: ejecutar las pruebas end-to-end de Playwright en modo headless.
+# Resultado verificable: el job falla si alguna prueba no pasa y publica el
+# reporte HTML de Playwright como artefacto descargable.
+name: Pruebas E2E
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  e2e:
+    name: Playwright headless (Chrome)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Descargar el repositorio
+        uses: actions/checkout@v4
+
+      - name: Preparar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            backend/package-lock.json
+            frontend/package-lock.json
+
+      - name: Instalar dependencias
+        run: npm run install:all
+
+      - name: Compilar frontend y backend
+        run: npm run build
+
+      - name: Instalar el navegador Chrome de Playwright
+        run: npx playwright install --with-deps chrome
+
+      # Playwright levanta el servidor Express (npm start) segun playwright.config.ts
+      # y ejecuta las pruebas contra http://localhost:3001 en modo headless.
+      - name: Ejecutar pruebas E2E
+        run: npx playwright test
+
+      - name: Guardar el reporte de Playwright
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reporte-playwright
+          path: playwright-report/
+          retention-days: 7

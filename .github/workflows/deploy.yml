@@ -1,0 +1,98 @@
+# Proposito: publicar la aplicacion completa (frontend + backend) en Render y
+# comprobar que la version publicada funciona.
+# Resultado verificable: el job falla si la compilacion falla, si Render no
+# acepta el despliegue o si las pruebas E2E contra la URL publica no pasan.
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Compilar y desplegar en Render
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Descargar el repositorio
+        uses: actions/checkout@v4
+
+      - name: Preparar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            backend/package-lock.json
+            frontend/package-lock.json
+
+      - name: Instalar dependencias
+        run: npm run install:all
+
+      # Si la compilacion falla, no se despliega nada.
+      - name: Compilar la aplicacion
+        run: npm run build
+
+      - name: Comprobar que los secretos estan configurados
+        env:
+          HOOK: ${{ secrets.RENDER_DEPLOY_HOOK }}
+          URL: ${{ vars.URL_PRODUCCION }}
+        run: |
+          if [ -z "$HOOK" ]; then
+            echo "Falta el secreto RENDER_DEPLOY_HOOK (Settings > Secrets > Actions)."
+            exit 1
+          fi
+          if [ -z "$URL" ]; then
+            echo "Falta la variable URL_PRODUCCION (Settings > Variables > Actions)."
+            exit 1
+          fi
+
+      - name: Pedir el despliegue a Render
+        run: curl --fail --silent --show-error -X POST "${{ secrets.RENDER_DEPLOY_HOOK }}"
+
+      # Render tarda un par de minutos en construir y reiniciar el servicio.
+      - name: Esperar a que la nueva version responda
+        env:
+          URL: ${{ vars.URL_PRODUCCION }}
+        run: |
+          echo "Esperando a $URL/api/salud ..."
+          for intento in $(seq 1 40); do
+            if curl --fail --silent "$URL/api/salud" > /dev/null; then
+              echo "La aplicacion publicada respondio en el intento $intento."
+              exit 0
+            fi
+            sleep 15
+          done
+          echo "La aplicacion publicada no respondio a tiempo."
+          exit 1
+
+  pruebas-en-produccion:
+    name: E2E contra la aplicacion publicada
+    needs: deploy
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Descargar el repositorio
+        uses: actions/checkout@v4
+
+      - name: Preparar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Instalar Playwright
+        run: npm ci
+
+      - name: Instalar el navegador Chrome de Playwright
+        run: npx playwright install --with-deps chrome
+
+      # Con URL_BASE definida, Playwright no levanta servidor local: prueba la
+      # aplicacion que acaba de publicarse.
+      - name: Ejecutar las pruebas contra la URL publica
+        env:
+          URL_BASE: ${{ vars.URL_PRODUCCION }}
+        run: npx playwright test
