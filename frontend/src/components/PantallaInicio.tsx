@@ -11,7 +11,7 @@ export function PantallaInicio({ onIniciar, cargando, error }: Props) {
     <div className="pantalla-inicio">
       <div className="inicio-contenido">
         <h1 className="titulo-juego">
-          MONITOS <span>EN FUGA</span>
+          POLLITOS <span>EN FUGA</span>
         </h1>
         <p className="inicio-lema">
           La jungla esta en llamas. Monito y Monita compiten por la ultima comida que queda mientras
